@@ -1,5 +1,6 @@
 import mysql.connector
 
+
 datenbank = mysql.connector.connect (
     host="localhost",
     user="root",
@@ -7,28 +8,22 @@ datenbank = mysql.connector.connect (
     database="finanzen",
 )
 
-print(datenbank)
 
-
-
-
-
-
-def alleAusgaben():
+def alleAusgaben(kategorie=None):
     cursor = datenbank.cursor()
-    cursor.execute("SELECT * FROM ausgaben")
+    if kategorie == all or kategorie is None:
+        cursor.execute("SELECT * FROM ausgaben")
+    else:
+        cursor.execute("SELECT * FROM ausgaben WHERE kategorie = %s", [kategorie])
     ergebnis=cursor.fetchall()
     return ergebnis
 
-print(alleAusgaben())
 
 def neueAusgabe(grund, wert, datum, kategorie):
     cursor = datenbank.cursor()
     cursor.execute("INSERT INTO ausgaben (grund, wert, datum, kategorie) values (%s, %s, %s, %s)", (grund, wert, datum, kategorie))
     datenbank.commit()
 
-neueAusgabe("smoothie", 3.0, "2023-02-12", 1)
-print(alleAusgaben())
 
 def gesamtwertKategorie(kategorie):
     cursor = datenbank.cursor()
@@ -40,6 +35,11 @@ def gesamtwertKategorie(kategorie):
         
     return summe
 
-print(gesamtwertKategorie(1))
+
+ # print(datenbank)
+print(alleAusgaben(1))
+# neueAusgabe("smoothie", 3.0, "2023-02-12", 1)
+# print(alleAusgaben())
+# print(gesamtwertKategorie(1))
 
 
