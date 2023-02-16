@@ -29,9 +29,10 @@ def loescheAusgabe(id):
     cursor.execute("DELETE FROM ausgaben WHERE id = %s", [id])
     datenbank.commit()
 
-def bearbeiteAusgabe(grund, wert, datum, kategorie):
+
+def bearbeiteAusgabe(grund, wert, datum, kategorie, id):
     cursor = datenbank.cursor()
-    cursor.execute("UPDATE ausgaben SET grund = '%s', wert = %s, datum = '%s', kategorie = %s WHERE id = %s", [grund, wert, datum, kategorie, id])
+    cursor.execute("UPDATE ausgaben SET grund = %s, wert = %s, datum = %s, kategorie = %s WHERE id = %s", [grund, wert, datum, kategorie, id])
     datenbank.commit()
 
 
@@ -42,7 +43,6 @@ def gesamtwertKategorie(kategorie):
     summe = 0
     for eintrag in ergebnis:
         summe += eintrag[0]
-        
     return summe
 
 
