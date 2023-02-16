@@ -35,8 +35,6 @@ def bearbeiteAusgabe(grund, wert, datum, kategorie):
     datenbank.commit()
 
 
-
-
 def gesamtwertKategorie(kategorie):
     cursor = datenbank.cursor()
     cursor.execute("SELECT wert FROM ausgaben WHERE kategorie = %s", [kategorie])
