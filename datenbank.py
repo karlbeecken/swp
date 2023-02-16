@@ -24,6 +24,18 @@ def neueAusgabe(grund, wert, datum, kategorie):
     cursor.execute("INSERT INTO ausgaben (grund, wert, datum, kategorie) values (%s, %s, %s, %s)", (grund, wert, datum, kategorie))
     datenbank.commit()
 
+def loescheAusgabe(id):
+    cursor = datenbank.cursor()
+    cursor.execute("DELETE FROM ausgaben WHERE id = %s", [id])
+    datenbank.commit()
+
+def bearbeiteAusgabe(grund, wert, datum, kategorie):
+    cursor = datenbank.cursor()
+    cursor.execute("UPDATE ausgaben SET grund = '%s', wert = %s, datum = '%s', kategorie = %s WHERE id = %s", [grund, wert, datum, kategorie, id])
+    datenbank.commit()
+
+
+
 
 def gesamtwertKategorie(kategorie):
     cursor = datenbank.cursor()
