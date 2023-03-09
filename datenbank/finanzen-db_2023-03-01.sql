@@ -98,13 +98,14 @@ MODIFY
 --
 -- Constraints der Tabelle `ausgaben`
 --
-ALTER TABLE
-  `ausgaben`
-ADD
-  CONSTRAINT `fk_kategorie` FOREIGN KEY (`kategorie`) REFERENCES `kategorie` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+alter table
+  ausgaben
+add
+  constraint ausgaben_kategorie_id_fk foreign key (kategorie) references kategorie (id);
 
-COMMIT;
-
+-- ALTER TABLE `ausgaben`
+--   ADD CONSTRAINT `fk_kategorie` FOREIGN KEY (`kategorie`) REFERENCES `kategorie` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+-- COMMIT;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */
 ;
 
