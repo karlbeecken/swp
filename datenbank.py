@@ -27,6 +27,8 @@ datenbank = mysql.connector.connect(
 )
 
 
+#bei Spezifizierung Parameter: Ausgabe aller Inhalte der Tabelle "ausgaben" mit dieser Kategorie als Attribut 
+#bei keiner Spezifizierung: Ausgabe aller Inhalte der Tabelle "ausgaben" 
 def alleAusgaben(kategorie=None):
     cursor = datenbank.cursor()
     if kategorie == all or kategorie is None:
@@ -42,19 +44,22 @@ def alleAusgaben(kategorie=None):
     return ergebnis
 
 
-def neueAusgabe(grund, wert, datum, kategorie):
+#erstellt neuen Eintrag in der Tabelle "ausgaben" mit den angegebenen Parametern als Werte
+def neueAusgabe(grund, wert, datum, kategorie):                                                                  
     cursor = datenbank.cursor()
     cursor.execute("INSERT INTO ausgaben (grund, wert, datum, kategorie) values (%s, %s, %s, %s)",
                    (grund, wert, datum, kategorie))
     datenbank.commit()
 
 
+#löscht Eintrag in der Tabelle "ausgaben", der den angegebenen Parameter als id trägt
 def loescheAusgabe(id):
     cursor = datenbank.cursor()
     cursor.execute("DELETE FROM ausgaben WHERE id = %s", [id])
     datenbank.commit()
 
 
+#ändert die Werte eines Eintrags mit einer bestimmten id in der Tabelle "ausgaben" zu den in den Parametern angegebenen anderen Werten
 def bearbeiteAusgabe(grund, wert, datum, kategorie, id):
     cursor = datenbank.cursor()
     cursor.execute("UPDATE ausgaben SET grund = %s, wert = %s, datum = %s, kategorie = %s WHERE id = %s", [
@@ -62,6 +67,7 @@ def bearbeiteAusgabe(grund, wert, datum, kategorie, id):
     datenbank.commit()
 
 
+#gibt die Summe von "wert" aller Einträge mit der als Parameter angegebenen Kategorie aus
 def gesamtwertKategorie(kategorie):
     cursor = datenbank.cursor()
     cursor.execute(
@@ -73,6 +79,7 @@ def gesamtwertKategorie(kategorie):
     return summe
 
 
+#Ausgabe aller Inhalte der Tabelle "kategorie"
 def alleKategorien():
     cursor = datenbank.cursor()
     cursor.execute("SELECT * FROM kategorie")
@@ -83,6 +90,7 @@ def alleKategorien():
     return ergebnis
 
 
+#erstellt neuen Eintrag in der Tabelle "kategorie" mit den angegebenen Parametern als Werte
 def neueKategorie(name, farbe, maximal):
     cursor = datenbank.cursor()
     cursor.execute("INSERT INTO kategorie (name, farbe, maximal) values (%s, %s, %s)",
@@ -90,12 +98,14 @@ def neueKategorie(name, farbe, maximal):
     datenbank.commit()
 
 
+#löscht Eintrag in der Tabelle "kategorie", der den angegebenen Parameter als id trägt
 def loescheKategorie(id):
     cursor = datenbank.cursor()
     cursor.execute("DELETE FROM kategorie WHERE id = %s", [id])
     datenbank.commit()
 
 
+#ändert die Werte eines Eintrags mit einer bestimmten id in der Tabelle "kategorie" zu den in den Parametern angegebenen anderen Werten
 def bearbeiteKategorie(name, farbe, maximal, id):
     cursor = datenbank.cursor()
     cursor.execute("UPDATE kategorie SET name = %s, farbe = %s, maximal = %s WHERE id = %s", [
