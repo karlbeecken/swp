@@ -9,7 +9,7 @@ COPY yarn.lock /usr/src/app/
 COPY . /usr/src/app/
 
 # Install node modules
-ONBUILD RUN yarn install
+RUN yarn install
 
 #RUN yarn build
 
