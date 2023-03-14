@@ -7,6 +7,8 @@
 
 ## Starten
 
+ggf. vorab bauen nötig: `docker-compose build`
+
 `docker-compose up -d`
 
 Das Frontend ist dann standardmäßig unter Port 3000 erreichbar, das Backend unter Port 8000.
