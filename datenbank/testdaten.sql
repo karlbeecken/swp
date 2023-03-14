@@ -16,7 +16,7 @@ VALUES
 INSERT INTO
   finanzen.ausgaben (grund, wert, datum, kategorie)
 VALUES
-  (3, 'Döner', 5.9, '2023-03-01', 1);
+  ('Döner', 5.9, '2023-03-01', 1);
 
 INSERT INTO
   finanzen.ausgaben (grund, wert, datum, kategorie)
