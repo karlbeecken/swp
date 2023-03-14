@@ -1,7 +1,7 @@
 INSERT INTO
   finanzen.kategorie (id, name, farbe, maximal)
 VALUES
-  (1, 'Essen', 'is-danger', 180);
+  (1, 'Essen', 'is-success', 180);
 
 INSERT INTO
   finanzen.kategorie (id, name, farbe, maximal)

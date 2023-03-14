@@ -50,9 +50,14 @@ export default {
     return {
       items: [
         {
+          title: "Startseite",
+          icon: "home",
+          to: { name: "index" },
+        },
+        {
           title: "Übersicht",
           icon: "table",
-          to: { name: "index" },
+          to: { name: "tabelle" },
         },
         {
           title: "Budgets",

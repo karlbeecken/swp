@@ -22,6 +22,10 @@ Die Backend-Docs sind unter Port http://localhost:8000/docs erreichbar.
 
 _ggf. muss `swp-db-1` durch den mittels `docker-compose ps` ermittelbaren Containernamen des Datenbankcontainers ersetzt werden; dieser ist je nach System und Docker-Version unterschiedlich_
 
+### Hinweise
+
+Wenn die Datenbank "einfach so" bearbeitet wird, werden die neuen Daten von der API nicht sofort angezeigt (Cache). Um die Datenbank zu aktualisieren, muss der Cache geleert werden. Dazu muss der API-Container neu gestartet werden: `docker-compose restart api`
+
 ---
 
 ### PIP im Schulnetzwerk
