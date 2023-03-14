@@ -1,10 +1,10 @@
 <template>
-  <div>
+  <section class="section">
     <div class="coolheader">
       <h1 class="title">Budgets</h1>
     </div>
     <BudgetFortschritt />
-  </div>
+  </section>
 </template>
 
 <script>
@@ -17,7 +17,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style>
 .coolheader {
   margin: 1em 0 2em 0;
 }

@@ -353,15 +353,24 @@ export default {
     };
   },
   async fetch() {
-    // Daten laden bei pageload
-    await this.$axios.$get("/kategorien").then((response) => {
+    try {
+      // Daten laden bei pageload
+      const kategorien = await this.$axios.$get("/kategorien");
       // und speichern im state des components
-      this.kategorien = response;
-    });
+      this.kategorien = kategorien;
 
-    await this.$axios.$get("/ausgaben").then((response) => {
-      this.data = response;
-    });
+      const ausgaben = await this.$axios.$get("/ausgaben");
+      this.data = ausgaben;
+    } catch (error) {
+      // wenn load vom server kommt, dann funktioniert localhost nicht => nutze direkt die interne docker-adresse
+      if (error.code === "ECONNREFUSED") {
+        const kategorien = await this.$axios.$get("http://api:8000/kategorien");
+        this.kategorien = kategorien;
+
+        const ausgaben = await this.$axios.$get("http://api:8000/ausgaben");
+        this.data = ausgaben;
+      }
+    }
   },
   name: "AusgabenTabelle",
 };

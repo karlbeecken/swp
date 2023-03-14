@@ -1,4 +1,5 @@
 from asyncio import sleep
+from os import environ
 import mysql.connector
 from pydantic import BaseModel
 from fastapi import FastAPI
@@ -9,6 +10,7 @@ app = FastAPI()
 origins = [
     "http://localhost",
     "http://localhost:3000",
+    environ.get("FRONTEND_URL"),
 ]
 
 app.add_middleware(
@@ -19,10 +21,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Datenbank-Verbindung als pool, um mehrere Abrufe parallel zu ermöglichen
 datenbank = mysql.connector.connect(
     pool_name="mypool",
     pool_size=25,
-    host="localhost",
+    host=environ.get("DB_HOST"),
     user="root",
     password="root",
     database="finanzen",
@@ -31,7 +34,8 @@ datenbank = mysql.connector.connect(
 
 # bei Spezifizierung Parameter: Ausgabe aller Inhalte der Tabelle "ausgaben" mit dieser Kategorie als Attribut
 # bei keiner Spezifizierung: Ausgabe aller Inhalte der Tabelle "ausgaben"
-def alleAusgaben(kategorie=None):
+def alle_ausgaben(kategorie=None):
+    # für jeden Abruf nutzen wir einen "frischen" Cursor (=Datenbank-Interaktionsobjekt)
     cursor = datenbank.cursor()
     if kategorie == "all" or kategorie is None:
         cursor.execute(
@@ -39,15 +43,16 @@ def alleAusgaben(kategorie=None):
     else:
         cursor.execute(
             "SELECT * FROM ausgaben WHERE kategorie = %s", [kategorie])
-    columns = cursor.description
 
+    # namen der Spalten werden als Schlüssel für die Werte verwendet
+    columns = cursor.description
     ergebnis = [{columns[index][0]:column for index,
                  column in enumerate(value)} for value in cursor.fetchall()]
     return ergebnis
 
 
 # erstellt neuen Eintrag in der Tabelle "ausgaben" mit den angegebenen Parametern als Werte
-def neueAusgabe(grund, wert, datum, kategorie):
+def neue_ausgabe(grund, wert, datum, kategorie):
     cursor = datenbank.cursor()
     cursor.execute("INSERT INTO ausgaben (grund, wert, datum, kategorie) values (%s, %s, %s, %s)",
                    (grund, wert, datum, kategorie))
@@ -55,14 +60,14 @@ def neueAusgabe(grund, wert, datum, kategorie):
 
 
 # löscht Eintrag in der Tabelle "ausgaben", der den angegebenen Parameter als id trägt
-def loescheAusgabe(id):
+def loesche_ausgabe(id):
     cursor = datenbank.cursor()
     cursor.execute("DELETE FROM ausgaben WHERE id = %s", [id])
     datenbank.commit()
 
 
 # ändert die Werte eines Eintrags mit einer bestimmten id in der Tabelle "ausgaben" zu den in den Parametern angegebenen anderen Werten
-def bearbeiteAusgabe(grund, wert, datum, kategorie, id):
+def bearbeite_ausgabe(grund, wert, datum, kategorie, id):
     cursor = datenbank.cursor()
     cursor.execute("UPDATE ausgaben SET grund = %s, wert = %s, datum = %s, kategorie = %s WHERE id = %s", [
                    grund, wert, datum, kategorie, id])
@@ -70,14 +75,8 @@ def bearbeiteAusgabe(grund, wert, datum, kategorie, id):
 
 
 # gibt die Summe von "wert" aller Einträge mit der als Parameter angegebenen Kategorie aus
-def gesamtwertKategorie(kategorie):
+def gesamtwert_kategorie(kategorie):
     cursor = datenbank.cursor()
-    # cursor.execute(
-    #    "SELECT wert FROM ausgaben WHERE kategorie = %s", [kategorie])
-    # ergebnis = cursor.fetchall()
-    # summe = 0
-    # for eintrag in ergebnis:
-    #    summe += eintrag[0]
 
     cursor.execute(
         "SELECT SUM(wert) FROM ausgaben WHERE kategorie = %s", [kategorie])
@@ -87,12 +86,12 @@ def gesamtwertKategorie(kategorie):
 
 
 # Ausgabe aller Inhalte der Tabelle "kategorie"
-def alleKategorien():
+def alle_kategorien():
     cursor = datenbank.cursor()
     cursor.execute("SELECT * FROM kategorie")
-    columns = cursor.description
 
     # namen der Spalten werden als Schlüssel für die Werte verwendet
+    columns = cursor.description
     ergebnis = [{columns[index][0]:column for index,
                  column in enumerate(value)} for value in cursor.fetchall()]
     return ergebnis
@@ -100,15 +99,15 @@ def alleKategorien():
 # alle kategorien mit gesamtwert
 
 
-def alleKategorienGesamtwert():
-    kategorien = alleKategorien()
+def alle_kategorien_gesamtwert():
+    kategorien = alle_kategorien()
     for kategorie in kategorien:
-        kategorie["gesamtwert"] = gesamtwertKategorie(kategorie["id"])
+        kategorie["gesamtwert"] = gesamtwert_kategorie(kategorie["id"])
     return kategorien
 
 
 # erstellt neuen Eintrag in der Tabelle "kategorie" mit den angegebenen Parametern als Werte
-def neueKategorie(name, farbe, maximal):
+def neue_kategorie(name, farbe, maximal):
     cursor = datenbank.cursor()
     cursor.execute("INSERT INTO kategorie (name, farbe, maximal) values (%s, %s, %s)",
                    (name, farbe, maximal))
@@ -116,14 +115,14 @@ def neueKategorie(name, farbe, maximal):
 
 
 # löscht Eintrag in der Tabelle "kategorie", der den angegebenen Parameter als id trägt
-def loescheKategorie(id):
+def loesche_kategorie(id):
     cursor = datenbank.cursor()
     cursor.execute("DELETE FROM kategorie WHERE id = %s", [id])
     datenbank.commit()
 
 
 # ändert die Werte eines Eintrags mit einer bestimmten id in der Tabelle "kategorie" zu den in den Parametern angegebenen anderen Werten
-def bearbeiteKategorie(name, farbe, maximal, id):
+def bearbeite_kategorie(name, farbe, maximal, id):
     cursor = datenbank.cursor()
     cursor.execute("UPDATE kategorie SET name = %s, farbe = %s, maximal = %s WHERE id = %s", [
                    name, farbe, maximal, id])
@@ -154,45 +153,45 @@ async def index():
 
 
 @app.get("/ausgaben")
-async def getAlleAusgabenApi():
-    return alleAusgaben()
+async def get_alle_ausgaben():
+    return alle_ausgaben()
 
 
 @app.get("/ausgaben/{kategorie}")
-async def getAlleAusgabenKategorie(kategorie):
-    return alleAusgaben(kategorie)
+async def get_alle_ausgaben_kategorie(kategorie):
+    return alle_ausgaben(kategorie)
 
 
 @app.post("/ausgaben")
-async def postNeueAusgabe(ausgabe: Ausgabe):
-    neueAusgabe(ausgabe.grund, ausgabe.wert,
-                ausgabe.datum, ausgabe.kategorie)
+async def post_neue_ausgabe(ausgabe: Ausgabe):
+    neue_ausgabe(ausgabe.grund, ausgabe.wert,
+                 ausgabe.datum, ausgabe.kategorie)
     return {"message": "Ausgabe wurde hinzugefügt", "ausgabe": ausgabe}
 
 
 @app.delete("/ausgaben/{id}")
-async def deleteLoescheAusgabe(id: int):
-    loescheAusgabe(id)
+async def delete_loesche_ausgabe(id: int):
+    loesche_ausgabe(id)
     return {"message": "Ausgabe wurde gelöscht", "id": id}
 
 
 @app.put("/ausgaben/{id}")
-async def putBearbeiteAusgabe(ausgabe: Ausgabe, id: int):
-    bearbeiteAusgabe(ausgabe.grund, ausgabe.wert,
-                     ausgabe.datum, ausgabe.kategorie, id)
+async def put_bearbeite_ausgabe(ausgabe: Ausgabe, id: int):
+    bearbeite_ausgabe(ausgabe.grund, ausgabe.wert,
+                      ausgabe.datum, ausgabe.kategorie, id)
     return {"message": "Ausgabe wurde bearbeitet", "ausgabe": ausgabe}
 
 
 @app.get("/ausgaben/kategorie/{kategorie}")
-async def getGesamtwertKategorie(kategorie):
-    return {"gesamtwert": gesamtwertKategorie(kategorie)}
+async def get_gesamtwert_kategorie(kategorie):
+    return {"gesamtwert": gesamtwert_kategorie(kategorie)}
 
 
 @app.get("/kategorien")
-async def getAlleKategorien():
-    return alleKategorien()
+async def get_alle_kategorien():
+    return alle_kategorien()
 
 
 @app.get("/kategorien/gesamtwert")
-async def getAlleKategorienGesamtwert():
-    return alleKategorienGesamtwert()
+async def get_alle_kategorien_gesamtwert():
+    return alle_kategorien_gesamtwert()

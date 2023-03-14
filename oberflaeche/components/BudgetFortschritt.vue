@@ -26,10 +26,18 @@ export default {
   }),
 
   async fetch() {
-    await this.$axios.get("/kategorien/gesamtwert").then(async (response) => {
-      this.kategorien = response.data;
-      console.log(this.kategorien);
-    });
+    try {
+      const kategorien = await this.$axios.get("/kategorien/gesamtwert");
+      this.kategorien = kategorien.data;
+    } catch (error) {
+      // wenn load vom server kommt, dann funktioniert localhost nicht => nutze direkt die interne docker-adresse
+      if (error.code === "ECONNREFUSED") {
+        const kategorien = await this.$axios.get(
+          "http://api:8000/kategorien/gesamtwert"
+        );
+        this.kategorien = kategorien.data;
+      }
+    }
   },
 };
 </script>

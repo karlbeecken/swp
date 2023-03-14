@@ -13,7 +13,7 @@
             height="28"
             style="margin-right: 3pt"
           />
-          <strong>Finanzen</strong>
+          <strong>BudgetBoss</strong>
         </a>
 
         <div class="navbar-burger">

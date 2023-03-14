@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   db:
     image: mysql:8.0
@@ -9,7 +9,40 @@ services:
       - MYSQL_DATABASE=finanzen
       - MYSQL_ROOT_PASSWORD=root
     ports:
-      - '3306:3306'
+      - "3306:3306"
     volumes:
       - ./mysql-data:/var/lib/mysql
       - ./datenbank/finanzen-db_2023-03-01.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - internal
+
+  web-app:
+    build: ./oberflaeche
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - BASE_URL=http://localhost:3000
+      - API_URL=http://localhost:8000
+    depends_on:
+      - db
+      - api
+    networks:
+      - internal
+
+  api:
+    build: ./server
+    restart: always
+    environment:
+      - DB_HOST=db
+      - FRONTEND_URL=http://localhost:3000
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
