@@ -65,21 +65,45 @@
     </div>
     <div class="column">
       <div style="height: 2.5em" />
-      <b-button type="is-primary" @click="istNeuDialogAktiv = true" expanded
-        >Neu</b-button
-      >
+      <b-tooltip label="Neuen Eintrag anlegen">
+        <b-button type="is-primary" @click="istNeuDialogAktiv = true" expanded
+          >Neu</b-button
+        >
+      </b-tooltip>
+
       <div style="height: 20px" />
-      <b-button
-        type="is-primary is-light"
-        @click="vorbereiteBearbeiteAusgabe"
-        :disabled="!selected"
-        expanded
-        >Bearbeiten</b-button
-      >
+      <b-tooltip label="Ausgewählte Ausgabe bearbeiten" type="is-light">
+        <b-button
+          type="is-primary is-light"
+          @click="vorbereiteBearbeiteAusgabe"
+          :disabled="!selected"
+          expanded
+          >Bearbeiten</b-button
+        >
+      </b-tooltip>
+
       <div style="height: 20px" />
-      <b-button type="is-danger" @click="confirmCustomDelete" expanded
-        >Löschen</b-button
-      >
+      <b-tooltip label="Ausgewählte Ausgabe löschen">
+        <b-button
+          type="is-danger"
+          @click="confirmCustomDelete"
+          :disabled="!selected"
+          tooltip="Ausgabe löschen"
+          expanded
+          >Löschen</b-button
+        >
+      </b-tooltip>
+
+      <div style="height: 20px" />
+      <b-tooltip label="Auswahl in Tabelle zurücksetzen">
+        <b-button
+          v-if="selected"
+          type="is-info is-outlined "
+          @click="selected = null"
+          expanded
+          >Auswahl zurücksetzen</b-button
+        >
+      </b-tooltip>
     </div>
 
     <b-modal
@@ -171,6 +195,7 @@
 export default {
   methods: {
     confirmCustomDelete() {
+      // Dialog zum Bestäigen der Löschung einer Ausgabe ("Sind Sie sicher?")
       this.$buefy.dialog.confirm({
         title: "Lösche Ausgabe",
         message: "Bist du sicher?",
@@ -182,6 +207,7 @@ export default {
       });
     },
     loescheAusgabe() {
+      // Anfrage an den Server senden mit ID der markierten Ausgabe
       this.$axios
         .delete("/ausgaben/" + this.selected.id)
         .then(async (response) => {
@@ -196,11 +222,13 @@ export default {
         });
     },
     neueAusgabe() {
+      // Wenn Dialog zum Bearbeiten geöffnet ist, dann Ausgabe bearbeiten und sonst nichts tun
       if (this.bearbeiten) {
         this.bearbeiteAusgabe();
         return;
       }
 
+      // Daten aus dem Formular auslesen...
       let ausgabe = {
         grund: this.grund,
         wert: this.wert,
@@ -208,6 +236,7 @@ export default {
         kategorie: this.kategorie.id,
       };
 
+      // ...und zum Server senden
       this.$axios
         .post("/ausgaben", ausgabe)
         .then(async (response) => {
@@ -224,12 +253,16 @@ export default {
         });
     },
     getDate(t) {
+      // Datum in das Format YYYY-MM-DD umwandeln (für MySQL wichtig)
+
       const date = ("0" + t.getDate()).slice(-2);
       const month = ("0" + (t.getMonth() + 1)).slice(-2);
       const year = t.getFullYear();
       return `${year}-${month}-${date}`;
     },
     zuruecksetzen() {
+      // Alle Formularfelder leeren
+
       this.datum = new Date();
       this.wert = 0.0;
       this.grund = "";
@@ -238,6 +271,8 @@ export default {
       this.istNeuDialogAktiv = false;
     },
     vorbereiteBearbeiteAusgabe() {
+      // Daten aus der markierten Tabellenzeile auslesen und in die Formularfelder schreiben
+
       this.bearbeiten = true;
 
       this.datum = new Date(this.selected.datum);
@@ -247,10 +282,12 @@ export default {
         (kategorie) => kategorie.id === this.selected.kategorie
       );
 
+      // Dialog öffnen
       this.istNeuDialogAktiv = true;
     },
 
     bearbeiteAusgabe() {
+      // Daten auslesen...
       let ausgabe = {
         id: this.selected.id,
         grund: this.grund,
@@ -259,6 +296,7 @@ export default {
         kategorie: this.kategorie.id,
       };
 
+      // ...und an den Server senden
       this.$axios
         .put(`/ausgaben/${ausgabe.id}`, ausgabe)
         .then(async (response) => {
@@ -315,30 +353,35 @@ export default {
     };
   },
   async fetch() {
+    // Daten laden bei pageload
     await this.$axios.$get("/kategorien").then((response) => {
+      // und speichern im state des components
       this.kategorien = response;
+    });
+
+    await this.$axios.$get("/ausgaben").then((response) => {
+      this.data = response;
     });
   },
   name: "AusgabenTabelle",
-  props: {
-    ausgabenListe: {
-      type: Array,
-      required: true,
-    },
-  },
 };
 </script>
 
 <style scoped>
 .modal .animation-content .modal-card {
-  overflow: visible !important;
+  overflow: visible !important; /* damit datepicker nicht abgeschnitten wird */
 }
 
 .modal-card-body {
-  overflow: visible !important;
+  overflow: visible !important; /* -"- */
 }
 
 .cool-modal {
-  overflow: visible;
+  overflow: visible; /* -"- */
+}
+
+.b-tooltip {
+  margin-bottom: 0.5em;
+  width: 100%; /* buttons gehen sonst nicht auf volle breite, expanded wirkt innerhalb tooltip nicht */
 }
 </style>

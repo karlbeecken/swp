@@ -1,0 +1,41 @@
+<template>
+  <div>
+    <div v-for="kategorie in kategorien" v-bind:key="kategorie.id">
+      <div class="budget-bar">
+        <h1 class="subtitle">
+          <strong>{{ kategorie.name }}:</strong>
+          {{ Math.round(kategorie.gesamtwert * 100) / 100 }} von
+          {{ kategorie.maximal }}&#8239;€
+        </h1>
+        <b-progress
+          :value="(kategorie.gesamtwert / kategorie.maximal) * 100"
+          show-value
+          format="percent"
+          size="is-large"
+        ></b-progress>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+export default {
+  name: "BudgetFortschritt",
+  data: () => ({
+    kategorien: [],
+  }),
+
+  async fetch() {
+    await this.$axios.get("/kategorien/gesamtwert").then(async (response) => {
+      this.kategorien = response.data;
+      console.log(this.kategorien);
+    });
+  },
+};
+</script>
+
+<style scoped>
+.budget-bar {
+  margin-bottom: 2em;
+}
+</style>
